@@ -114,4 +114,91 @@ export const cases = [
       ar: ["هيكلة الإطلاق", "تنسيق الموردين", "المعايير التشغيلية"],
     },
   },
+  {
+    id: 5,
+    name: { en: "Vartavar Festival", ar: "مهرجان فارتافار" },
+    context: { en: "Event Execution", ar: "تنفيذ الفعاليات" },
+    headline: {
+      en: "Execution coordination across multiple event stakeholders.",
+      ar: "تنسيق تنفيذي عبر أصحاب مصلحة متعددين في الفعالية.",
+    },
+    problem: {
+      en: "The event required coordination across venue, suppliers, branding, ticketing, media, logistics, and safety — with no single system holding the moving parts together.",
+      ar: "تطلبت الفعالية تنسيقًا بين المكان، والموردين، والهوية البصرية، والتذاكر، والإعلام، واللوجستيات، والسلامة — من دون نظام واحد يجمع كل هذه الأجزاء المتحركة.",
+    },
+    finding: {
+      en: "The event wasn't struggling for lack of effort. It was struggling for lack of one coordinated system across every moving part.",
+      ar: "لم تكن الفعالية تعاني من نقص الجهد، بل من غياب نظام واحد ينسّق كل الأجزاء المتحركة.",
+    },
+    structuring: {
+      en: "Chassis supported task allocation, stakeholder follow-up, weekly reporting, logistics coordination, and execution tracking across the full event workflow.",
+      ar: "دعمت Chassis توزيع المهام، ومتابعة أصحاب المصلحة، والتقارير الأسبوعية، والتنسيق اللوجستي، وتتبع التنفيذ عبر سير عمل الفعالية بالكامل.",
+    },
+    outcome: {
+      en: "The project moved with clearer coordination, better follow-up, and stronger execution visibility across every stakeholder — venue, suppliers, branding, ticketing, media, logistics, and safety.",
+      ar: "تقدّم المشروع بتنسيق أوضح، ومتابعة أفضل، ورؤية تنفيذية أقوى عبر كل الأطراف — المكان، والموردين، والهوية البصرية، والتذاكر، والإعلام، واللوجستيات، والسلامة.",
+    },
+    tags: {
+      en: ["event operations", "stakeholder coordination", "execution reporting"],
+      ar: ["عمليات الفعاليات", "تنسيق أصحاب المصلحة", "تقارير التنفيذ"],
+    },
+  },
+  {
+    id: 6,
+    name: { en: "Aline Kamakian / FIG Holding", ar: "ألين كاماكيان / FIG Holding" },
+    context: { en: "Recognition Research", ar: "أبحاث التكريم" },
+    headline: {
+      en: "Turning scattered award opportunities into a clear decision system.",
+      ar: "تحويل فرص التكريم المتناثرة إلى نظام قرار واضح.",
+    },
+    problem: {
+      en: "Award and recognition opportunities were scattered across countries, categories, criteria, fees, deadlines, and application requirements — with no system to compare or act on them.",
+      ar: "كانت فرص التكريم والجوائز متناثرة بين دول وفئات ومعايير ورسوم ومواعيد نهائية ومتطلبات تقديم مختلفة — من دون نظام لمقارنتها أو التصرف بناءً عليها.",
+    },
+    finding: {
+      en: "The gap wasn't a lack of opportunities. It was the lack of a system to filter, compare, and act on the ones that mattered.",
+      ar: "لم تكن الفجوة نقصًا في الفرص، بل غياب نظام لفرزها ومقارنتها والتصرف بناءً على المهم منها.",
+    },
+    structuring: {
+      en: "Chassis researched, filtered, and compared opportunities, then structured them into usable information for decision-making and outreach.",
+      ar: "بحثت Chassis في الفرص، وفرزتها، وقارنت بينها، ثم هيكلتها في معلومات قابلة للاستخدام لاتخاذ القرار والتواصل.",
+    },
+    outcome: {
+      en: "Scattered recognition opportunities became a clear research and decision system instead of disconnected information.",
+      ar: "تحوّلت فرص التكريم المتناثرة إلى نظام بحث وقرار واضح بدلاً من معلومات مبعثرة.",
+    },
+    tags: {
+      en: ["award research", "opportunity mapping", "strategic outreach"],
+      ar: ["أبحاث الجوائز", "رسم خرائط الفرص", "التواصل الاستراتيجي"],
+    },
+  },
+  {
+    id: 7,
+    name: { en: "Smart Vision", ar: "Smart Vision" },
+    context: { en: "Digital Infrastructure", ar: "البنية الرقمية" },
+    headline: {
+      en: "Building a credible digital foundation from the ground up.",
+      ar: "بناء أساس رقمي موثوق من الصفر.",
+    },
+    problem: {
+      en: "The business needed a credible digital foundation to present its work clearly and professionally, with no structure or hierarchy behind the existing presence.",
+      ar: "احتاج العمل إلى أساس رقمي موثوق لعرض أعماله بوضوح واحترافية، من دون هيكلية أو تسلسل خلف الحضور الحالي.",
+    },
+    finding: {
+      en: "The gap wasn't visibility. It was structure — nothing organized the business's story into something a client could follow.",
+      ar: "لم تكن الفجوة في الظهور، بل في الهيكلية — لا شيء كان ينظّم قصة العمل بشكل يستطيع العميل متابعته.",
+    },
+    structuring: {
+      en: "Chassis organized and built the website experience, content hierarchy, and digital foundation behind the business.",
+      ar: "نظّمت Chassis وبنت تجربة الموقع الإلكتروني، وتسلسل المحتوى، والأساس الرقمي خلف العمل.",
+    },
+    outcome: {
+      en: "The business gained a more structured, credible, and shareable online presence that supports professional conversations.",
+      ar: "اكتسب العمل حضورًا رقميًا أكثر هيكلية وموثوقية وقابلية للمشاركة، يدعم المحادثات الاحترافية.",
+    },
+    tags: {
+      en: ["website structure", "digital presence", "execution infrastructure"],
+      ar: ["هيكلة الموقع الإلكتروني", "الحضور الرقمي", "بنية التنفيذ"],
+    },
+  },
 ];

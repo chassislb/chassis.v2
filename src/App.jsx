@@ -7,7 +7,9 @@ import DependencyReveal from "./components/DependencyReveal/DependencyReveal";
 import OperatingMap from "./components/OperatingMap/OperatingMap";
 import Method from "./components/Method/Method";
 import Conditions from "./components/Conditions/Conditions";
+import About from "./components/About/About";
 import CaseFiles from "./components/CaseFiles/CaseFiles";
+import Testimonials from "./components/Testimonials/Testimonials";
 import Layers from "./components/Layers/Layers";
 import Outcomes from "./components/Outcomes/Outcomes";
 import BuildWithAI from "./components/BuildWithAI/BuildWithAI";
@@ -34,7 +36,9 @@ function HomePage() {
       <OperatingMap />
       <Method />
       <Conditions />
+      <About />
       <CaseFiles />
+      <Testimonials />
       <Layers />
       <Outcomes />
       <BuildWithAI />

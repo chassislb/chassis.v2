@@ -1,7 +1,7 @@
 import logoWhite from "../../assets/logo/chassis-logo-white.webp";
 import { useLanguage } from "../../i18n/LanguageContext";
 
-const navKeys = ["diagnosis", "map", "method", "conditions", "cases", "layers", "contact"];
+const navKeys = ["diagnosis", "map", "method", "conditions", "about", "cases", "layers", "contact"];
 
 export default function Footer() {
   const { t } = useLanguage();

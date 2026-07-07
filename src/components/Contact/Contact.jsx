@@ -3,7 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight, Mail } from "lucide-react";
-import { FaWhatsapp, FaLinkedinIn, FaInstagram } from "react-icons/fa6";
+import { FaWhatsapp, FaLinkedinIn, FaInstagram, FaFacebookF } from "react-icons/fa6";
 import MagneticButton from "../MagneticButton/MagneticButton";
 import CursorGlow from "../CursorGlow/CursorGlow";
 import Starfield from "../Starfield/Starfield";
@@ -39,6 +39,13 @@ const contactLinks = [
     icon: FaInstagram,
     display: "instagram/chassis.lb",
     color: "#E1306C",
+  },
+  {
+    label: "facebook",
+    href: "https://www.facebook.com/chassis.lb",
+    icon: FaFacebookF,
+    display: "facebook/chassis.lb",
+    color: "#1877F2",
   },
 ];
 

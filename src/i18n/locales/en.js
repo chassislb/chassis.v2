@@ -4,6 +4,7 @@ export default {
     map: "map",
     method: "method",
     conditions: "conditions",
+    about: "about",
     cases: "cases",
     layers: "layers",
     contact: "contact",
@@ -84,6 +85,18 @@ export default {
     whatItMeans: "what it means",
     forExample: "for example",
   },
+  about: {
+    eyebrow: "operational background",
+    headline: "Structured by someone who's done the work — not just consulted on it.",
+    stats: [
+      { number: "8+", label: "years inside real operations" },
+      { number: "7+", label: "businesses restructured" },
+      { number: "3", label: "industries: hospitality, startups, consulting" },
+    ],
+    bio: "Sophia Ayoubi spent 8+ years inside real businesses before founding Chassis — restructuring hospitality venues, launching startups, and running operations at Emirates Airlines, where execution without chaos wasn't optional.",
+    closing: "Chassis isn't advisory from a distance. It's built from the inside: identify what's broken, fix it, build what's missing, and leave a business that works without her.",
+    cta: "connect on linkedin",
+  },
   cases: {
     eyebrow: "case files",
     headline1: "proof should show",
@@ -95,6 +108,10 @@ export default {
     whatChanged: "what changed",
     theOutcome: "the outcome",
     googleReview: "google review",
+  },
+  testimonials: {
+    eyebrow: "what clients say",
+    headline: "Real businesses. Real results.",
   },
   layers: {
     eyebrow: "structural work",
