@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -10,50 +10,34 @@ export default function Method() {
   const { t } = useLanguage();
   const steps = t("method.steps");
   const section = useRef(null);
-  const slider = useRef(null);
-  const [active, setActive] = useState(0);
 
   useGSAP(
     () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(min-width: 1024px)", () => {
-        const panels = gsap.utils.toArray(".panel");
-        const distance = slider.current.scrollWidth - window.innerWidth;
-
-        gsap.to(panels, {
-          xPercent: -100 * (panels.length - 1),
-          ease: "none",
-          scrollTrigger: {
-            trigger: section.current,
-            pin: true,
-            scrub: 1,
-            snap: 1 / (panels.length - 1),
-            end: () => "+=" + distance,
-            onUpdate: (self) =>
-              setActive(Math.min(panels.length - 1, Math.round(self.progress * (panels.length - 1)))),
-          },
-        });
-
-        return () => gsap.set(panels, { clearProps: "transform" });
+      const panels = gsap.utils.toArray(".panel", section.current);
+      panels.forEach((panel) => {
+        gsap.fromTo(
+          panel,
+          { opacity: 0, y: 32 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            scrollTrigger: { trigger: panel, start: "top 75%" },
+          }
+        );
       });
-
-      return () => mm.revert();
     },
     { scope: section, dependencies: [steps] }
   );
 
   return (
-    <section
-      ref={section}
-      id="method"
-      className="relative overflow-hidden bg-neutral-950 text-white lg:h-screen"
-    >
-      <div ref={slider} className="flex flex-col lg:h-screen lg:flex-row">
+    <section ref={section} id="method" className="relative overflow-hidden bg-neutral-950 text-white">
+      <div className="flex flex-col divide-y divide-white/10">
         {steps.map((step, i) => (
           <div
             key={i}
-            className="panel flex min-h-screen w-full flex-shrink-0 items-center justify-center px-8 py-24 lg:h-screen lg:w-screen lg:px-16 lg:py-0"
+            className="panel flex min-h-[70vh] w-full items-center justify-center px-8 py-24 lg:px-16"
           >
             <div className="max-w-3xl">
               <p className="mb-8 text-sm font-semibold uppercase tracking-[0.35em] text-[#36C6F4]">
@@ -69,18 +53,6 @@ export default function Method() {
               </p>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Progress indicator */}
-      <div className="absolute bottom-10 left-1/2 flex -translate-x-1/2 items-center gap-3">
-        {steps.map((step, i) => (
-          <span
-            key={step.title}
-            className={`h-1.5 rounded-full transition-all duration-500 ${
-              i === active ? "w-8 bg-[#F3CC31]" : "w-1.5 bg-white/25"
-            }`}
-          />
         ))}
       </div>
     </section>

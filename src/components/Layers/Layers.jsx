@@ -10,7 +10,6 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Layers() {
   const { t, lang } = useLanguage();
   const sectionRef = useRef(null);
-  const trackRef = useRef(null);
   const headerRef = useRef(null);
 
   useGSAP(
@@ -27,28 +26,19 @@ export default function Layers() {
         }
       );
 
-      const mm = gsap.matchMedia();
-
-      mm.add("(min-width: 1024px)", () => {
-        const track = trackRef.current;
-        const distance = track.scrollWidth - track.parentElement.clientWidth;
-        if (distance <= 0) return;
-
-        gsap.to(track, {
-          x: () => -distance,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            pin: true,
-            scrub: 1,
-            end: () => "+=" + distance,
-          },
-        });
-
-        return () => gsap.set(track, { clearProps: "transform" });
-      });
-
-      return () => mm.revert();
+      const cards = gsap.utils.toArray(".layer-card", sectionRef.current);
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: cards[0], start: "top 85%" },
+        }
+      );
     },
     { scope: sectionRef, dependencies: [lang] }
   );
@@ -57,10 +47,10 @@ export default function Layers() {
     <section
       ref={sectionRef}
       id="layers"
-      className="relative overflow-hidden bg-[#F8F7F3] px-6 py-28 lg:h-screen lg:px-12 lg:py-0"
+      className="relative overflow-hidden bg-[#F8F7F3] px-6 py-28 lg:px-12 lg:py-32"
     >
-      <div className="mx-auto flex h-full max-w-7xl flex-col lg:justify-center">
-        <div ref={headerRef} className="mb-10 lg:mb-14">
+      <div className="mx-auto max-w-7xl">
+        <div ref={headerRef} className="mb-14 lg:mb-16">
           <div className="mb-6 flex items-center gap-3">
             <span className="h-2.5 w-2.5 rounded-full bg-[#36C6F4]" />
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-neutral-400">
@@ -78,19 +68,16 @@ export default function Layers() {
           </div>
         </div>
 
-        <div
-          ref={trackRef}
-          className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 lg:snap-none lg:overflow-visible lg:pb-0"
-        >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s) => (
             <div
               key={s.id}
-              className="layer-card w-[82vw] flex-shrink-0 snap-start rounded-2xl border border-neutral-200 bg-white p-8 sm:w-[420px] lg:w-[420px] lg:p-10"
+              className="layer-card rounded-2xl border border-neutral-200 bg-white p-8 lg:p-10"
             >
               <span className="mb-8 block text-xs font-semibold uppercase tracking-[0.25em] text-[#F3CC31]">
                 {s.number}
               </span>
-              <h3 className="mb-4 text-2xl font-bold tracking-[-0.02em] text-neutral-950 lg:text-3xl">
+              <h3 className="mb-4 text-2xl font-bold tracking-[-0.02em] text-neutral-950">
                 {s.name[lang]}
               </h3>
               <p className="text-base leading-7 text-neutral-500">

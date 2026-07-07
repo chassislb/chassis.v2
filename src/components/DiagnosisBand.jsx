@@ -7,7 +7,7 @@ export default function DiagnosisBand() {
 
   return (
     <section className="relative overflow-hidden bg-neutral-950 px-6 py-16 text-white lg:px-12 lg:py-20">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 text-center lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:text-start">
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:text-start">
         <div>
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.28em] text-[#F3CC31]">
             {t("band.eyebrow")}
