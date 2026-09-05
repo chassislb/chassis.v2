@@ -1,13 +1,25 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import en from "./locales/en";
 import ar from "./locales/ar";
+import { parseLangPath, buildLangPath } from "./langPath";
 
 const dictionaries = { en, ar };
 const LanguageContext = createContext(null);
 
+// The URL is the source of truth for language (needed for correct hreflang
+// and for prerendered snapshots, which have no localStorage). A returning
+// visitor with a saved Arabic preference landing on an English URL gets
+// bounced to the Arabic URL synchronously, before first paint, so there's
+// no flash of the wrong language.
 function getInitialLang() {
   if (typeof window === "undefined") return "en";
-  return localStorage.getItem("chassis-lang") === "ar" ? "ar" : "en";
+  const { lang: urlLang, path } = parseLangPath(window.location.pathname);
+  if (urlLang === "en" && localStorage.getItem("chassis-lang") === "ar") {
+    const nextPath = buildLangPath("ar", path);
+    window.history.replaceState({}, "", nextPath + window.location.search + window.location.hash);
+    return "ar";
+  }
+  return urlLang;
 }
 
 function readPath(obj, path) {
@@ -15,7 +27,7 @@ function readPath(obj, path) {
 }
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(getInitialLang);
+  const [lang, setLangState] = useState(getInitialLang);
   const dir = lang === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
@@ -24,7 +36,23 @@ export function LanguageProvider({ children }) {
     localStorage.setItem("chassis-lang", lang);
   }, [lang, dir]);
 
-  const toggleLang = () => setLang((prev) => (prev === "en" ? "ar" : "en"));
+  useEffect(() => {
+    const onPopState = () => setLangState(parseLangPath(window.location.pathname).lang);
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const setLang = (nextLang) => {
+    setLangState((prev) => {
+      if (nextLang === prev) return prev;
+      const { path } = parseLangPath(window.location.pathname);
+      const nextPathname = buildLangPath(nextLang, path);
+      window.history.pushState({}, "", nextPathname + window.location.search + window.location.hash);
+      return nextLang;
+    });
+  };
+
+  const toggleLang = () => setLang(lang === "en" ? "ar" : "en");
 
   const t = (key) => {
     const value = readPath(dictionaries[lang], key);

@@ -1,47 +1,45 @@
-import { useEffect } from "react";
 import Navbar from "./components/Navbar/Navbar";
 import Hero from "./components/Hero/Hero";
-import DiagnosisBand from "./components/DiagnosisBand";
-import Diagnosis from "./components/Diagnosis/Diagnosis";
-import DependencyReveal from "./components/DependencyReveal/DependencyReveal";
-import OperatingMap from "./components/OperatingMap/OperatingMap";
-import Method from "./components/Method/Method";
-import Conditions from "./components/Conditions/Conditions";
+import Problem from "./components/Problem/Problem";
+import Process from "./components/Process/Process";
+import Services from "./components/Services/Services";
+import Work from "./components/Work/Work";
 import About from "./components/About/About";
-import CaseFiles from "./components/CaseFiles/CaseFiles";
+import Direction from "./components/Direction/Direction";
 import Testimonials from "./components/Testimonials/Testimonials";
-import Layers from "./components/Layers/Layers";
-import Outcomes from "./components/Outcomes/Outcomes";
-import BuildWithAI from "./components/BuildWithAI/BuildWithAI";
 import Contact from "./components/Contact/Contact";
 import Footer from "./components/Footer/Footer";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import { initLenis, destroyLenis } from "./lib/lenis";
-import { LanguageProvider } from "./i18n/LanguageContext";
+import AuditModal from "./components/Audit/AuditModal";
+import SEO from "./components/common/SEO";
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
+import { AuditModalProvider } from "./context/AuditModalContext";
+import { parseLangPath } from "./i18n/langPath";
+import { organizationSchema, serviceSchema, faqSchema } from "./seo/schema";
 
 function HomePage() {
-  useEffect(() => {
-    initLenis();
-    return () => destroyLenis();
-  }, []);
+  const { t, lang } = useLanguage();
+  const services = t("services.items");
+  const faq = t("services.faq");
 
   return (
-    <main className="min-h-screen bg-[#F8F7F3] text-neutral-950">
+    <main className="min-h-screen bg-[var(--bg)] text-white">
+      <SEO
+        path="/"
+        title={t("meta.title")}
+        description={t("meta.description")}
+        jsonLd={[organizationSchema(lang), ...services.map((item) => serviceSchema(item, lang)), faqSchema(faq)]}
+      />
       <Navbar />
       <Hero />
-      <DiagnosisBand />
-      <Diagnosis />
-      <DependencyReveal />
-      <OperatingMap />
-      <Method />
-      <Conditions />
+      <Problem />
+      <Process />
+      <Services />
+      <Work />
       <About />
-      <CaseFiles />
+      <Direction />
       <Testimonials />
-      <Layers />
-      <Outcomes />
-      <BuildWithAI />
       <Contact />
       <Footer />
     </main>
@@ -49,12 +47,23 @@ function HomePage() {
 }
 
 function App() {
-  const path = window.location.pathname;
+  // "/audit" has no dedicated page anymore — it's a popup available from any
+  // page. Visiting the URL directly still lands you on a real page (the
+  // homepage) and AuditModalProvider opens the popup on top of it.
+  // Language lives as a "/ar" URL prefix, so strip it before matching pages.
+  const { path } = parseLangPath(window.location.pathname);
   let page = <HomePage />;
   if (path === "/terms" || path === "/terms/") page = <Terms />;
   else if (path === "/privacy" || path === "/privacy/") page = <Privacy />;
 
-  return <LanguageProvider>{page}</LanguageProvider>;
+  return (
+    <LanguageProvider>
+      <AuditModalProvider>
+        {page}
+        <AuditModal />
+      </AuditModalProvider>
+    </LanguageProvider>
+  );
 }
 
 export default App;

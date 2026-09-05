@@ -1,88 +1,126 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowDown } from "lucide-react";
-import sophia from "../../assets/logo/sophia.webp";
-import CursorGlow from "../CursorGlow/CursorGlow";
-import Starfield from "../Starfield/Starfield";
+import { motion } from "framer-motion";
 import { useLanguage } from "../../i18n/LanguageContext";
+import { useAuditModal } from "../../context/AuditModalContext";
 
-gsap.registerPlugin(ScrollTrigger);
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
 
 function Hero() {
   const { t } = useLanguage();
-  const sectionRef = useRef(null);
-  const imageRef = useRef(null);
-
-  useGSAP(
-    () => {
-      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-
-      tl.from(".hero-line", { yPercent: 110, stagger: 0.12, duration: 1.1 }, 0.2)
-        .from(".hero-cue", { opacity: 0, y: 12, duration: 0.8 }, "-=0.3")
-        .from(imageRef.current, { opacity: 0, y: 40, duration: 1.2, ease: "power2.out" }, 0.35);
-
-      gsap.to(imageRef.current, {
-        yPercent: 6,
-        ease: "none",
-        scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true },
-      });
-    },
-    { scope: sectionRef }
-  );
+  const { openAudit } = useAuditModal();
+  const ticker = t("hero.ticker");
 
   return (
-    <section ref={sectionRef} className="relative flex min-h-screen items-center overflow-hidden bg-neutral-950 text-white">
-      <CursorGlow color="#36C6F4" />
-      <Starfield seed={1} count={40} />
-
-      <div className="absolute inset-0 opacity-[0.06]">
-        <div className="h-full w-full bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:72px_72px]" />
+    <section id="top" className="relative flex min-h-[92vh] items-center overflow-hidden bg-[var(--bg)] pt-28 text-white sm:pt-24">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.05]">
+        <div className="h-full w-full bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:64px_64px]" />
       </div>
+      <div
+        className="pointer-events-none absolute -top-40 start-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-20 blur-[120px]"
+        style={{ background: "radial-gradient(circle, var(--blue), transparent 70%)" }}
+        aria-hidden="true"
+      />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-16 px-6 py-32 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:px-12 lg:py-0">
-        <div className="text-center lg:text-left">
-          <h1 className="mx-auto max-w-2xl text-[clamp(2.6rem,6vw,4.75rem)] font-extrabold leading-[1.03] tracking-[-0.03em] lg:mx-0">
-            <span className="block overflow-hidden">
-              <span className="hero-line inline-block">{t("hero.line1")}</span>
-            </span>
-            <span className="block overflow-hidden">
-              <span className="hero-line inline-block">
-                {t("hero.line2")} <span className="text-[#F3CC31]">{t("hero.accent")}</span>
-              </span>
-            </span>
-          </h1>
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-6 py-16 text-center lg:px-12">
+        <motion.p
+          initial="hidden"
+          animate="show"
+          custom={0}
+          variants={fadeUp}
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-white/70"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--yellow)]" />
+          {t("hero.eyebrow")}
+        </motion.p>
 
+        <motion.h1
+          initial="hidden"
+          animate="show"
+          custom={1}
+          variants={fadeUp}
+          className="mx-auto max-w-4xl text-[clamp(2.3rem,5.4vw,4.25rem)] font-extrabold leading-[1.08] tracking-[-0.03em]"
+        >
+          {t("hero.headlineA")} <span className="text-[var(--yellow)]">{t("hero.headlineEmphasis")}</span>{" "}
+          {t("hero.headlineB")}
+        </motion.h1>
+
+        <motion.p
+          initial="hidden"
+          animate="show"
+          custom={2}
+          variants={fadeUp}
+          className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/65"
+        >
+          {t("hero.subhead")}
+        </motion.p>
+
+        <motion.div
+          initial="hidden"
+          animate="show"
+          custom={3}
+          variants={fadeUp}
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
           <a
-            href="#diagnosis"
-            className="hero-cue group mt-16 inline-flex flex-col items-center gap-3 text-white/40 transition hover:text-white lg:items-start"
+            href="https://calendly.com/chassis-lb/chassis-discovery-call"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full rounded-full bg-[var(--yellow)] px-7 py-3.5 text-sm font-bold text-neutral-950 transition hover:bg-white sm:w-auto"
           >
-            <span className="text-xs font-semibold uppercase tracking-[0.35em]">
-              {t("hero.cue")}
-            </span>
-            <ArrowDown size={16} className="animate-[bob_1.8s_ease-in-out_infinite] transition group-hover:text-[#36C6F4]" />
+            {t("hero.ctaPrimary")}
           </a>
-        </div>
+          <a
+            href="#process"
+            className="w-full rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-white/50 sm:w-auto"
+          >
+            {t("hero.ctaSecondary")}
+          </a>
+        </motion.div>
 
-        <div ref={imageRef} className="relative mx-auto w-full max-w-sm lg:max-w-none">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10">
-            <img
-              src={sophia}
-              alt="Sophia Ayoubi, founder of Chassis"
-              className="h-full w-full object-cover object-top"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/50 via-transparent to-transparent" />
-          </div>
+        <motion.p
+          initial="hidden"
+          animate="show"
+          custom={4}
+          variants={fadeUp}
+          className="mt-6 text-sm text-white/40"
+        >
+          {t("audit.homeCtaLead")}{" "}
+          <button
+            type="button"
+            onClick={openAudit}
+            className="font-semibold text-[var(--blue)] underline underline-offset-4 transition hover:text-white"
+          >
+            {t("audit.homeCtaLink")}
+          </button>
+        </motion.p>
+      </div>
 
-          <div className="absolute -bottom-5 start-5 rounded-2xl border border-white/10 bg-neutral-950/90 px-5 py-4 backdrop-blur-xl">
-            <p className="text-sm font-bold text-white">{t("hero.founderName")}</p>
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40">
-              {t("hero.founderTitle")}
-            </p>
-          </div>
+      <div className="absolute inset-x-0 bottom-0 overflow-hidden border-t border-white/10 bg-white/[0.03] py-4">
+        <div className="flex w-max animate-[ticker_28s_linear_infinite] gap-10 whitespace-nowrap motion-reduce:animate-none">
+          {[...ticker, ...ticker, ...ticker].map((item, i) => (
+            <span key={i} className="flex items-center gap-10 text-sm font-semibold uppercase tracking-[0.2em] text-white/40">
+              {item}
+              <span className="text-[var(--blue)]">—</span>
+            </span>
+          ))}
         </div>
       </div>
+
+      <style>{`
+        @keyframes ticker {
+          from { transform: translateX(0); }
+          to { transform: translateX(-33.333%); }
+        }
+        [dir="rtl"] .animate-\\[ticker_28s_linear_infinite\\] {
+          animation-direction: reverse;
+        }
+      `}</style>
     </section>
   );
 }

@@ -1,68 +1,62 @@
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import SEO from "../components/common/SEO";
+import { useLanguage } from "../i18n/LanguageContext";
+import { buildLangPath } from "../i18n/langPath";
+import { organizationSchema } from "../seo/schema";
 
-export function LegalSection({ title, children }) {
-  return (
-    <div className="mb-14 last:mb-0">
-      <p className="mb-6 text-xs font-bold uppercase tracking-[0.28em] text-[#36C6F4]">{title}</p>
-      <div className="flex flex-col gap-6">{children}</div>
-    </div>
-  );
-}
+export default function LegalPage({ contentKey, path }) {
+  const { t, lang } = useLanguage();
+  const content = t(contentKey);
 
-export function LegalItem({ number, title, children }) {
-  return (
-    <div>
-      {number && (
-        <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-[#F3CC31]">
-          {number}
-        </span>
-      )}
-      {title && <h3 className="mb-2 text-lg font-bold tracking-[-0.01em] text-neutral-950">{title}</h3>}
-      <div className="text-base leading-7 text-neutral-600">{children}</div>
-    </div>
-  );
-}
-
-export function LegalList({ items }) {
-  return (
-    <ul className="flex flex-col gap-3">
-      {items.map((item) => (
-        <li key={item} className="flex items-start gap-3 text-base leading-7 text-neutral-600">
-          <span className="mt-2.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#F3CC31]" />
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export default function LegalPage({ eyebrow, title, subtitle, lastUpdated, intro, children }) {
   return (
     <>
+      <SEO
+        path={path}
+        title={`${content.heading} — Chassis`}
+        description={content.intro}
+        jsonLd={[organizationSchema(lang)]}
+      />
       <Navbar />
-      <main className="min-h-screen bg-[#F8F7F3] px-6 py-32 text-neutral-950 lg:px-12">
+      <main className="min-h-screen bg-[var(--bg)] px-6 pb-24 pt-32 text-white lg:px-12 lg:pt-36">
         <div className="mx-auto max-w-3xl">
           <div className="mb-6 flex items-center gap-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#36C6F4]" />
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-neutral-400">{eyebrow}</p>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--blue)]" />
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/40">{content.title}</p>
           </div>
 
-          <h1 className="mb-6 text-[clamp(2.2rem,4.5vw,3.4rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
-            {title}
+          <h1 className="mb-6 text-[clamp(2rem,4.2vw,3.2rem)] font-extrabold leading-[1.1] tracking-[-0.02em]">
+            {content.heading}
           </h1>
-          <p className="mb-2 text-lg leading-8 text-neutral-500">{subtitle}</p>
-          {lastUpdated && <p className="mb-8 text-sm font-medium text-neutral-400">{lastUpdated}</p>}
-          <p className="mb-16 max-w-2xl text-base leading-7 text-neutral-600">{intro}</p>
+          <p className="mb-2 text-sm font-medium text-white/40">{content.updated}</p>
+          <p className="mb-14 max-w-2xl text-base leading-7 text-white/65">{content.intro}</p>
 
-          {children}
+          <div className="flex flex-col gap-10">
+            {content.sections.map((section) => (
+              <div key={section.heading}>
+                <h2 className="mb-2 text-lg font-bold text-white">{section.heading}</h2>
+                <p className="text-base leading-7 text-white/60">{section.body}</p>
+              </div>
+            ))}
+          </div>
 
-          <div className="mt-6 border-t border-neutral-200 pt-8">
+          <p className="mt-12 rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm font-semibold leading-6 text-white/80">
+            {content.commitment}
+          </p>
+
+          <p className="mt-8 text-sm leading-6 text-white/60">
+            {content.contactLabel}{" "}
+            <a href="mailto:chassis.lb@gmail.com" className="font-bold text-white underline underline-offset-4 transition hover:text-[var(--yellow)]">
+              chassis.lb@gmail.com
+            </a>
+          </p>
+
+          <div className="mt-14 border-t border-white/10 pt-8">
             <a
-              href="/"
-              className="text-sm font-bold text-neutral-950 underline underline-offset-4 transition hover:text-[#36C6F4]"
+              href={buildLangPath(lang, "/")}
+              className="text-sm font-bold text-white underline underline-offset-4 transition hover:text-[var(--yellow)]"
             >
-              ← back to chassis
+              ← {t("legal.backHome")}
             </a>
           </div>
         </div>

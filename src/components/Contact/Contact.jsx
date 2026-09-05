@@ -1,139 +1,58 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, Mail } from "lucide-react";
-import { FaWhatsapp, FaLinkedinIn, FaInstagram, FaFacebookF } from "react-icons/fa6";
-import MagneticButton from "../MagneticButton/MagneticButton";
-import CursorGlow from "../CursorGlow/CursorGlow";
-import Starfield from "../Starfield/Starfield";
+import { ArrowUpRight, Mail, MessageCircle } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const contactLinks = [
-  {
-    label: "email",
-    href: "mailto:chassis.lb@gmail.com",
-    icon: Mail,
-    display: "chassis.lb@gmail.com",
-    color: "#F3CC31",
-  },
-  {
-    label: "whatsapp",
-    href: "https://wa.me/96171085824",
-    icon: FaWhatsapp,
-    display: "+961 71 085 824",
-    color: "#25D366",
-  },
-  {
-    label: "linkedin",
-    href: "https://www.linkedin.com/company/109408069/",
-    icon: FaLinkedinIn,
-    display: "linkedin/chassis",
-    color: "#0A66C2",
-  },
-  {
-    label: "instagram",
-    href: "https://www.instagram.com/chassis.lb/",
-    icon: FaInstagram,
-    display: "instagram/chassis.lb",
-    color: "#E1306C",
-  },
-  {
-    label: "facebook",
-    href: "https://www.facebook.com/chassis.lb",
-    icon: FaFacebookF,
-    display: "facebook/chassis.lb",
-    color: "#1877F2",
-  },
-];
-
 export default function Contact() {
-  const { t, dir } = useLanguage();
-  const sectionRef = useRef(null);
-  const contentRef = useRef(null);
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 75%",
-          },
-        }
-      );
-    },
-    { scope: sectionRef }
-  );
+  const { t } = useLanguage();
 
   return (
-    <section
-      ref={sectionRef}
-      id="contact"
-      className="relative overflow-hidden bg-neutral-950 px-6 py-40 text-white lg:px-12"
-    >
-      <CursorGlow color="#36C6F4" />
-      <Starfield seed={4} count={36} />
+    <section id="contact" className="relative overflow-hidden border-t border-white/10 bg-[var(--bg)] px-6 py-24 text-white sm:py-32 lg:px-12">
+      <div
+        className="pointer-events-none absolute -bottom-32 start-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-20 blur-[120px]"
+        style={{ background: "radial-gradient(circle, var(--yellow), transparent 70%)" }}
+        aria-hidden="true"
+      />
 
-      <div className="absolute inset-0 opacity-[0.04]">
-        <div className="h-full w-full bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:72px_72px]" />
-      </div>
+      <div className="relative mx-auto max-w-3xl text-center">
+        <p className="mb-6 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-white/50">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--blue)]" />
+          {t("finalCta.eyebrow")}
+        </p>
 
-      <div ref={contentRef} className="relative mx-auto max-w-4xl text-center">
-
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#36C6F4]" />
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/40">
-            {t("contact.eyebrow")}
-          </p>
-        </div>
-
-        <h2 className="mb-14 text-balance text-[clamp(2.2rem,5.2vw,4.5rem)] font-extrabold leading-[1.1] tracking-[-0.02em]">
-          {t("contact.headline1")} {t("contact.headline2")}{" "}
-          <span className="text-[#F3CC31]">{t("contact.headlineAccent")}</span>
+        <h2 className="mb-6 text-balance text-[clamp(2rem,4.6vw,3.5rem)] font-extrabold leading-[1.12] tracking-[-0.02em]">
+          {t("finalCta.heading")}
         </h2>
 
-        <MagneticButton
-          href="https://calendly.com/chassis-lb/chassis-discovery-call"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mb-16 inline-flex items-center gap-3 rounded-full bg-[#F3CC31] px-10 py-5 text-sm font-bold text-neutral-950 transition-colors duration-300 hover:bg-white"
-        >
-          {t("contact.cta")}
-          <ArrowUpRight
-            size={16}
-            className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:scale-x-[-1]"
-          />
-        </MagneticButton>
+        <p className="mx-auto mb-10 max-w-xl text-base leading-7 text-white/60">{t("finalCta.body")}</p>
 
-        <div className="flex items-center justify-center gap-4">
-          {contactLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <a
-                key={link.label}
-                href={link.href}
-                aria-label={link.display}
-                title={link.display}
-                target={link.label !== "email" ? "_blank" : undefined}
-                rel="noopener noreferrer"
-                style={{ "--hover-color": link.color }}
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 text-white/50 transition duration-200 hover:border-[var(--hover-color)] hover:bg-[var(--hover-color)]/10 hover:text-[var(--hover-color)]"
-              >
-                <Icon size={18} />
-              </a>
-            );
-          })}
+        <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a
+            href="https://calendly.com/chassis-lb/chassis-discovery-call"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--yellow)] px-8 py-4 text-sm font-bold text-neutral-950 transition hover:bg-white sm:w-auto"
+          >
+            {t("finalCta.ctaPrimary")}
+            <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:scale-x-[-1]" />
+          </a>
+          <a
+            href="https://wa.me/96171085824"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-8 py-4 text-sm font-bold text-white transition hover:border-white/50 sm:w-auto"
+          >
+            <MessageCircle size={16} />
+            {t("finalCta.ctaSecondary")}
+          </a>
         </div>
 
+        <a
+          href="mailto:chassis.lb@gmail.com"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-white/50 transition hover:text-white"
+        >
+          <Mail size={14} /> chassis.lb@gmail.com
+        </a>
+
+        <p className="mt-10 text-sm font-medium text-white/35">{t("finalCta.closing")}</p>
       </div>
     </section>
   );
