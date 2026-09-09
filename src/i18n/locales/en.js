@@ -1,6 +1,6 @@
 export default {
   meta: {
-    title: "Chassis — Business Structuring & Execution Infrastructure",
+    title: "Chassis — Operational Structuring & Execution Infrastructure",
     description:
       "Chassis diagnoses what breaks in your operations, structures how the business should work, and builds the execution systems that keep it moving.",
   },
@@ -535,12 +535,14 @@ export default {
       startOver: "Start over",
       whatsappButton: "Send via WhatsApp",
       whatsappNote: "This opens WhatsApp with your audit summary ready to send — you just need to press Send.",
+      bookCallButton: "Book a Discovery Call",
       whatsappEmailedNotice: "Your complete audit was sent by email — check your inbox.",
       backHome: "Exit audit",
     },
 
     success: {
       title: "Audit received.",
+      ctaLead: "Want to talk it through now instead of waiting? Book a Discovery Call.",
       paragraphs: [
         "Thank you for giving me a real look inside your business.",
         "I'll personally review your answers and look at the patterns behind the individual problems, where the structure may be breaking, what may be causing it, and what deserves attention first.",

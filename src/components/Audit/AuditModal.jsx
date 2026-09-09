@@ -393,15 +393,26 @@ export default function AuditModal() {
 
               {whatsapp && (
                 <div>
-                  <a
-                    href={whatsapp.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-white/50"
-                  >
-                    <MessageCircle size={16} />
-                    {t("audit.ui.whatsappButton")}
-                  </a>
+                  <p className="mb-4 text-sm text-white/50">{t("audit.success.ctaLead")}</p>
+                  <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                    <a
+                      href="https://calendly.com/chassis-lb/chassis-discovery-call"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full rounded-full bg-[var(--yellow)] px-7 py-3.5 text-sm font-bold text-neutral-950 transition hover:bg-white sm:w-auto"
+                    >
+                      {t("audit.ui.bookCallButton")}
+                    </a>
+                    <a
+                      href={whatsapp.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-white/50 sm:w-auto"
+                    >
+                      <MessageCircle size={16} />
+                      {t("audit.ui.whatsappButton")}
+                    </a>
+                  </div>
                   <p className="mt-3 text-xs text-white/35">{t("audit.ui.whatsappNote")}</p>
                 </div>
               )}
