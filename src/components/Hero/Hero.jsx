@@ -106,7 +106,7 @@ function Hero() {
           {[...ticker, ...ticker, ...ticker].map((item, i) => (
             <span key={i} className="flex items-center gap-10 text-sm font-semibold uppercase tracking-[0.2em] text-white/40">
               {item}
-              <span className="text-[var(--blue)]">—</span>
+              <span className="text-[var(--blue)]">·</span>
             </span>
           ))}
         </div>

@@ -7,31 +7,35 @@ const CHASSIS_EMAIL = "chassis.lb@gmail.com";
 const CHASSIS_WHATSAPP = "96171085824";
 const EMAIL_ENDPOINT = `https://formsubmit.co/ajax/${CHASSIS_EMAIL}`;
 
-// Conservative raw-text budget before we fall back to a concise WhatsApp
-// message. Arabic expands roughly 3x once URL-encoded (multi-byte UTF-8),
-// so this keeps the encoded URL comfortably under safe mobile/browser limits.
-const WHATSAPP_FULL_TEXT_LIMIT = 1200;
-
-export async function submitAuditEmail({ meta, sections }) {
+export async function submitDiagnosticEmail({
+  meta,
+  questionResults,
+  resultTitle,
+  resultBody,
+  recommendationTitle,
+  recommendationBody,
+  recommendationPrice,
+  recommendationDeliverables,
+}) {
   const payload = {
-    _subject: `NEW CHASSIS BUSINESS AUDIT — ${meta.businessName || "Unnamed business"}`,
+    _subject: `NEW CHASSIS DIAGNOSTIC: ${meta.businessName || "Unnamed business"}`,
     _template: "table",
     _captcha: "false",
     _honey: "",
-    "Business Name": meta.businessName,
-    "Contact Name & Role": meta.contactName,
-    Email: meta.email,
-    "Phone / WhatsApp": meta.phone,
-    "Number of Locations": meta.locationsLabel,
-    "Team Size": meta.teamSize,
-    "Audit Language": meta.language,
+    "Business Name": meta.businessName || "N/A",
+    Name: meta.name || "N/A",
+    Email: meta.email || "N/A",
+    "Phone / WhatsApp": meta.phone || "N/A",
+    Language: meta.language,
     "Submission Date and Time": meta.timestamp,
+    Result: `${resultTitle} ${resultBody}`,
+    "Recommended Starting Point": `${recommendationTitle} (${recommendationPrice || "custom quote"})`,
+    "Why This Recommendation": recommendationBody,
+    "What's Included": (recommendationDeliverables || []).join(" | "),
   };
 
-  sections.forEach((section) => {
-    section.items.forEach((item) => {
-      payload[`${section.title} — ${item.label}`] = item.answer || "—";
-    });
+  questionResults.forEach(({ label, checked }) => {
+    payload[label] = checked ? "Yes" : "No";
   });
 
   const response = await fetch(EMAIL_ENDPOINT, {
@@ -41,64 +45,48 @@ export async function submitAuditEmail({ meta, sections }) {
   });
 
   if (!response.ok) {
-    throw new Error("Audit email submission failed");
+    throw new Error("Diagnostic email submission failed");
   }
 
   return response;
 }
 
-function buildFullWhatsAppText({ meta, sections }, headerLabel) {
+export function buildWhatsAppUrl(
+  {
+    meta,
+    questionResults,
+    resultTitle,
+    resultBody,
+    recommendationTitle,
+    recommendationBody,
+    recommendationPrice,
+    recommendationDeliverables,
+  },
+  headerLabel
+) {
   const lines = [headerLabel, ""];
-  lines.push(`Business: ${meta.businessName}`);
-  lines.push(`Contact: ${meta.contactName}`);
-  lines.push(`Email: ${meta.email}`);
-  lines.push(`Phone: ${meta.phone}`);
-  lines.push(`Locations: ${meta.locationsLabel}`);
-  lines.push(`Team Size: ${meta.teamSize}`);
-  lines.push(`Language: ${meta.language}`);
+  lines.push(`Business: ${meta.businessName || "N/A"}`);
+  lines.push(`Name: ${meta.name || "N/A"}`);
+  lines.push(`Email: ${meta.email || "N/A"}`);
+  lines.push(`Phone: ${meta.phone || "N/A"}`);
   lines.push("");
-
-  sections.forEach((section) => {
-    lines.push(section.title.toUpperCase());
-    section.items.forEach((item) => {
-      lines.push(`Q: ${item.label}`);
-      lines.push(`A: ${item.answer || "—"}`);
-    });
+  lines.push(`Result: ${resultTitle}`);
+  lines.push(resultBody);
+  lines.push("");
+  lines.push(`Recommended starting point: ${recommendationTitle} (${recommendationPrice || "custom quote"})`);
+  lines.push(recommendationBody);
+  if (recommendationDeliverables?.length) {
     lines.push("");
+    lines.push("What's included:");
+    recommendationDeliverables.forEach((d) => lines.push(`- ${d}`));
+  }
+  lines.push("");
+  lines.push("Answers:");
+
+  questionResults.forEach(({ label, checked }) => {
+    lines.push(`${checked ? "Yes" : "No"}: ${label}`);
   });
 
-  return lines.join("\n").trim();
-}
-
-function buildConciseWhatsAppText({ meta }, headerLabel, emailedNoticeLabel) {
-  const lines = [headerLabel, ""];
-  lines.push(`Business: ${meta.businessName}`);
-  lines.push(`Contact: ${meta.contactName}`);
-  lines.push(`Email: ${meta.email}`);
-  lines.push(`Phone: ${meta.phone}`);
-  lines.push(`Locations: ${meta.locationsLabel}`);
-  lines.push(`Team Size: ${meta.teamSize}`);
-  lines.push(`Language: ${meta.language}`);
-
-  if (meta.topChallengeLabel && meta.topChallenge) {
-    lines.push("");
-    lines.push(`${meta.topChallengeLabel}: ${meta.topChallenge}`);
-  }
-
-  lines.push("");
-  lines.push(emailedNoticeLabel);
-
-  return lines.join("\n").trim();
-}
-
-export function buildWhatsAppUrl(structured, copy) {
-  const fullText = buildFullWhatsAppText(structured, copy.header);
-  const text = fullText.length <= WHATSAPP_FULL_TEXT_LIMIT
-    ? fullText
-    : buildConciseWhatsAppText(structured, copy.header, copy.emailedNotice, copy.topAnswerLabel);
-
-  return {
-    url: `https://wa.me/${CHASSIS_WHATSAPP}?text=${encodeURIComponent(text)}`,
-    isFull: fullText.length <= WHATSAPP_FULL_TEXT_LIMIT,
-  };
+  const text = lines.join("\n").trim();
+  return `https://wa.me/${CHASSIS_WHATSAPP}?text=${encodeURIComponent(text)}`;
 }

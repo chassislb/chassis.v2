@@ -1,17 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, MessageCircle, X } from "lucide-react";
+import { Check, MessageCircle, X } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { useAuditModal } from "../../context/AuditModalContext";
 import { useModalBehavior } from "../../hooks/useModalBehavior";
-import { AUDIT_QUESTIONS, AUDIT_SECTIONS, getVisibleQuestions } from "../../data/auditQuestions";
-import { submitAuditEmail, buildWhatsAppUrl } from "../../utils/auditSubmit";
-import AuditProgress from "./AuditProgress";
-import AuditQuestion from "./AuditQuestion";
-
-const STORAGE_KEY = "chassis-audit-progress-v1";
-const AUTO_ADVANCE_TYPES = ["single_select", "scale"];
+import { DIAGNOSTIC_QUESTIONS, getScoreBand, getCategoryBreakdown, recommendService } from "../../data/diagnosticQuestions";
+import { submitDiagnosticEmail, buildWhatsAppUrl } from "../../utils/auditSubmit";
 
 function LangToggle() {
   const { lang, setLang } = useLanguage();
@@ -37,8 +32,7 @@ function LangToggle() {
   );
 }
 
-function ModalHeader({ showProgress, current, total, onClose }) {
-  const { t } = useLanguage();
+function ModalHeader({ onClose, closeLabel }) {
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-[var(--bg)]/95 backdrop-blur">
       <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
@@ -48,39 +42,52 @@ function ModalHeader({ showProgress, current, total, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label={t("audit.ui.backHome")}
+            aria-label={closeLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-white/40"
           >
             <X size={16} />
           </button>
         </div>
       </div>
-      {showProgress && <AuditProgress current={current} total={total} />}
     </header>
   );
 }
 
-function validateAnswer(question, value) {
-  if (!question.required) return null;
-  switch (question.type) {
-    case "short_text":
-    case "long_text":
-      return value && String(value).trim() ? null : "requiredError";
-    case "email":
-      if (!value || !String(value).trim()) return "requiredError";
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim()) ? null : "emailError";
-    case "phone":
-      if (!value || !String(value).trim()) return "requiredError";
-      return /^[+]?[\d\s-]{7,}$/.test(String(value).trim()) ? null : "phoneError";
-    case "single_select":
-      return value ? null : "requiredError";
-    case "multi_select":
-      return Array.isArray(value) && value.length > 0 ? null : "selectAtLeastOne";
-    case "scale":
-      return typeof value === "number" ? null : "requiredError";
-    default:
-      return null;
-  }
+function ChecklistItem({ label, checked, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={checked}
+      className="flex w-full items-start gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-start transition hover:border-white/25"
+    >
+      <span
+        className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition ${
+          checked ? "border-[var(--yellow)] bg-[var(--yellow)]" : "border-white/25"
+        }`}
+      >
+        {checked && <Check size={16} className="text-neutral-950" strokeWidth={3} />}
+      </span>
+      <span className="text-base leading-6 text-white/85">{label}</span>
+    </button>
+  );
+}
+
+function CategoryBar({ name, gaps, total }) {
+  const pct = total ? Math.round((gaps / total) * 100) : 0;
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between text-sm">
+        <span className="font-semibold text-white">{name}</span>
+        <span className="text-white/40">
+          {gaps}/{total}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-full rounded-full bg-[var(--yellow)]" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
 }
 
 export default function AuditModal() {
@@ -88,179 +95,95 @@ export default function AuditModal() {
   const { isOpen, closeAudit } = useAuditModal();
   const containerRef = useRef(null);
 
-  const [stage, setStage] = useState("intro"); // intro | form | submitting | success
+  const [stage, setStage] = useState("intro"); // intro | checklist | results
   const [answers, setAnswers] = useState({});
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [errorKey, setErrorKey] = useState(null);
-  const [submitErrorKey, setSubmitErrorKey] = useState(null);
-  const [autoAdvanceNonce, setAutoAdvanceNonce] = useState(0);
-  const [whatsapp, setWhatsapp] = useState(null);
-  const hydrated = useRef(false);
+  const [contact, setContact] = useState({ name: "", email: "", businessName: "", phone: "" });
+  const [contactErrorKey, setContactErrorKey] = useState(null);
+  const [sendState, setSendState] = useState("idle"); // idle | sending | sent | error
 
   useModalBehavior(isOpen, containerRef, closeAudit);
 
-  const visibleQuestions = useMemo(() => getVisibleQuestions(answers), [answers]);
-  const total = visibleQuestions.length;
-  const safeIndex = Math.min(currentIndex, Math.max(total - 1, 0));
-  const question = visibleQuestions[safeIndex];
-  const dict = question ? t(`audit.questions.${question.id}`) : null;
+  const uncheckedCount = DIAGNOSTIC_QUESTIONS.length - Object.values(answers).filter(Boolean).length;
+  const band = useMemo(() => getScoreBand(uncheckedCount), [uncheckedCount]);
+  const breakdown = useMemo(() => getCategoryBreakdown(answers), [answers]);
+  const recommendationKey = useMemo(() => recommendService(breakdown), [breakdown]);
 
-  // Restore in-progress audit on first mount so an accidental refresh/close doesn't erase it.
-  useEffect(() => {
-    if (hydrated.current) return;
-    hydrated.current = true;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (saved && saved.answers && Object.keys(saved.answers).length > 0) {
-        setAnswers(saved.answers);
-        setCurrentIndex(saved.currentIndex || 0);
-        setStage("form");
-      }
-    } catch {
-      // ignore corrupted storage
-    }
-  }, []);
+  const bandCopy = t(`audit.results.bands.${band}`);
+  const recommendationCopy = t(`audit.results.recommendations.${recommendationKey}`);
+  const recommendedService = t("services.items").find((item) => item.id === recommendationKey);
+  const categories = t("audit.categories");
+  const questionResults = DIAGNOSTIC_QUESTIONS.map((q) => ({
+    label: t(`audit.questions.${q.id}`),
+    checked: Boolean(answers[q.id]),
+  }));
 
-  // Persist progress while filling out the form.
-  useEffect(() => {
-    if (stage !== "form") return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, currentIndex: safeIndex }));
-    } catch {
-      // storage unavailable — proceed without local persistence
-    }
-  }, [answers, safeIndex, stage]);
-
-  function goNext(currentAnswers = answers) {
-    const err = validateAnswer(question, currentAnswers[question.id]);
-    if (err) {
-      setErrorKey(err);
-      return;
-    }
-    setErrorKey(null);
-    if (safeIndex >= total - 1) {
-      submitAudit(currentAnswers);
-    } else {
-      setCurrentIndex(safeIndex + 1);
-    }
-  }
-
-  function goBack() {
-    setErrorKey(null);
-    if (safeIndex > 0) setCurrentIndex(safeIndex - 1);
-  }
-
-  function handleChange(value) {
-    const next = { ...answers, [question.id]: value };
-    setAnswers(next);
-    setErrorKey(null);
-    if (AUTO_ADVANCE_TYPES.includes(question.type)) {
-      setAutoAdvanceNonce((n) => n + 1);
-    }
-  }
-
-  // Auto-advance for single-select/scale questions, using freshly-committed state.
-  useEffect(() => {
-    if (autoAdvanceNonce === 0) return undefined;
-    const timer = setTimeout(() => {
-      goNext(answers);
-    }, 280);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoAdvanceNonce]);
-
-  function buildStructuredPayload(finalAnswers) {
-    const locationsDict = t("audit.questions.locations");
-    const languageLabel = lang === "ar" ? "Arabic / العربية" : "English";
-    const meta = {
-      businessName: finalAnswers.business_name || "",
-      contactName: finalAnswers.contact_name_role || "",
-      email: finalAnswers.email || "",
-      phone: finalAnswers.phone || "",
-      locationsLabel: locationsDict?.options?.[finalAnswers.locations] || finalAnswers.locations || "",
-      teamSize: finalAnswers.team_size || "",
-      language: languageLabel,
-      timestamp: new Date().toLocaleString("en-GB", { timeZone: "Asia/Beirut" }) + " (Beirut time)",
-      topChallengeLabel: t("audit.questions.biggest_challenge")?.label,
-      topChallenge: finalAnswers.biggest_challenge || "",
-    };
-
-    const sections = AUDIT_SECTIONS.map((sectionKey) => {
-      const items = AUDIT_QUESTIONS.filter(
-        (q) => q.section === sectionKey && (!q.conditional || q.conditional(finalAnswers))
-      ).map((q) => {
-        const qDict = t(`audit.questions.${q.id}`);
-        let answerDisplay = finalAnswers[q.id];
-        if (q.type === "single_select") {
-          answerDisplay = qDict?.options?.[finalAnswers[q.id]] || finalAnswers[q.id] || "";
-        } else if (q.type === "multi_select") {
-          const arr = Array.isArray(finalAnswers[q.id]) ? finalAnswers[q.id] : [];
-          answerDisplay = arr.map((v) => qDict?.options?.[v] || v).join(", ");
-        } else if (q.type === "scale") {
-          answerDisplay = finalAnswers[q.id] != null ? String(finalAnswers[q.id]) : "";
-        }
-        return { label: qDict?.label || q.id, answer: answerDisplay || "" };
-      });
-      return { title: t(`audit.sections.${sectionKey}`), items };
-    }).filter((section) => section.items.length > 0);
-
-    return { meta, sections };
-  }
-
-  async function submitAudit(finalAnswers) {
-    setStage("submitting");
-    setSubmitErrorKey(null);
-    const structured = buildStructuredPayload(finalAnswers);
-    try {
-      await submitAuditEmail(structured);
-      try {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        // ignore
-      }
-      const wa = buildWhatsAppUrl(structured, {
-        header: "NEW CHASSIS BUSINESS AUDIT",
-        emailedNotice: t("audit.ui.whatsappEmailedNotice"),
-      });
-      setWhatsapp(wa);
-      setStage("success");
-    } catch {
-      setSubmitErrorKey("submitError");
-      setStage("form");
-    }
-  }
-
-  function startOver() {
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
-    setAnswers({});
-    setCurrentIndex(0);
-    setErrorKey(null);
-    setSubmitErrorKey(null);
-    setStage("intro");
+  function toggleAnswer(id) {
+    setAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   function handleClose() {
-    // Closing mid-audit is non-destructive: progress is already saved to
-    // localStorage and will be restored next time the modal opens.
     closeAudit();
-    if (stage === "success") {
-      // Reset so a future open starts fresh rather than showing a stale success screen.
-      setStage("intro");
-      setAnswers({});
-      setCurrentIndex(0);
-      setWhatsapp(null);
+    setStage("intro");
+    setAnswers({});
+    setSendState("idle");
+  }
+
+  function startOver() {
+    setAnswers({});
+    setSendState("idle");
+    setStage("checklist");
+  }
+
+  async function sendResults() {
+    if (!contact.name.trim() || !contact.email.trim()) {
+      setContactErrorKey("requiredError");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+      setContactErrorKey("emailError");
+      return;
+    }
+    setContactErrorKey(null);
+    setSendState("sending");
+    try {
+      await submitDiagnosticEmail({
+        meta: {
+          name: contact.name,
+          email: contact.email,
+          businessName: contact.businessName,
+          phone: contact.phone,
+          language: lang === "ar" ? "Arabic / العربية" : "English",
+          timestamp: new Date().toLocaleString("en-GB", { timeZone: "Asia/Beirut" }) + " (Beirut time)",
+        },
+        questionResults,
+        resultTitle: bandCopy.title,
+        resultBody: bandCopy.body,
+        recommendationTitle: recommendationCopy.title,
+        recommendationBody: recommendationCopy.body,
+        recommendationPrice: recommendedService?.price,
+        recommendationDeliverables: recommendedService?.deliverables || [],
+      });
+      setSendState("sent");
+    } catch {
+      setSendState("error");
     }
   }
 
   if (!isOpen) return null;
 
-  const NextIcon = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const whatsappUrl = buildWhatsAppUrl(
+    {
+      meta: { name: contact.name, email: contact.email, businessName: contact.businessName, phone: contact.phone },
+      questionResults,
+      resultTitle: bandCopy.title,
+      resultBody: bandCopy.body,
+      recommendationTitle: recommendationCopy.title,
+      recommendationBody: recommendationCopy.body,
+      recommendationPrice: recommendedService?.price,
+      recommendationDeliverables: recommendedService?.deliverables || [],
+    },
+    "NEW CHASSIS BUSINESS DIAGNOSTIC"
+  );
 
   return createPortal(
     <div className="fixed inset-0 z-[200]">
@@ -277,147 +200,172 @@ export default function AuditModal() {
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         className="relative flex h-full w-full flex-col overflow-y-auto bg-[var(--bg)] text-white"
       >
+        <ModalHeader onClose={handleClose} closeLabel={t("audit.ui.backHome")} />
+
         {stage === "intro" && (
-          <>
-            <ModalHeader showProgress={false} onClose={handleClose} />
-            <main className="mx-auto flex min-h-[calc(100vh-73px)] w-full max-w-2xl flex-col justify-center px-6 py-16 text-center">
-              <p className="mb-4 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-[var(--blue)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--blue)]" />
-                {t("audit.intro.eyebrow")}
+          <main className="mx-auto flex min-h-[calc(100vh-73px)] w-full max-w-2xl flex-col justify-center px-6 py-16 text-center">
+            <p className="mb-4 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-[var(--blue)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--blue)]" />
+              {t("audit.intro.eyebrow")}
+            </p>
+            <h1 className="mb-5 text-[clamp(2rem,5vw,3rem)] font-extrabold uppercase leading-[1.1] tracking-[-0.02em]">
+              {t("audit.intro.title")}
+            </h1>
+            <p className="mb-8 text-lg font-medium leading-8 text-white/80">{t("audit.intro.lead")}</p>
+            <div className="mb-8 flex flex-col gap-4 text-start text-base leading-7 text-white/65">
+              {t("audit.intro.paragraphs").map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+              <p className="font-semibold text-white">{t("audit.intro.reviewNote")}</p>
+              <p className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
+                {t("audit.intro.disclaimer")}
               </p>
-              <h1 className="mb-5 text-[clamp(2rem,5vw,3rem)] font-extrabold uppercase leading-[1.1] tracking-[-0.02em]">
-                {t("audit.intro.title")}
-              </h1>
-              <p className="mb-8 text-lg font-medium leading-8 text-white/80">{t("audit.intro.lead")}</p>
-              <div className="mb-8 flex flex-col gap-4 text-start text-base leading-7 text-white/65">
-                {t("audit.intro.paragraphs").map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-                <p className="font-semibold text-white">{t("audit.intro.reviewNote")}</p>
-                <p className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
-                  {t("audit.intro.disclaimer")}
-                </p>
-              </div>
-              <p className="mb-8 text-sm font-semibold uppercase tracking-[0.15em] text-white/40">{t("audit.intro.time")}</p>
-              <button
-                type="button"
-                onClick={() => setStage("form")}
-                className="mx-auto inline-flex items-center gap-2 rounded-full bg-[var(--yellow)] px-8 py-4 text-sm font-bold text-neutral-950 transition hover:bg-white"
-              >
-                {t("audit.intro.cta")}
-                <NextIcon size={16} />
-              </button>
-            </main>
-          </>
+            </div>
+            <p className="mb-8 text-sm font-semibold uppercase tracking-[0.15em] text-white/40">{t("audit.intro.time")}</p>
+            <button
+              type="button"
+              onClick={() => setStage("checklist")}
+              className="mx-auto inline-flex items-center gap-2 rounded-full bg-[var(--yellow)] px-8 py-4 text-sm font-bold text-neutral-950 transition hover:bg-white"
+            >
+              {t("audit.intro.cta")}
+            </button>
+          </main>
         )}
 
-        {(stage === "form" || stage === "submitting") && question && (
-          <>
-            <ModalHeader showProgress current={safeIndex + 1} total={total} onClose={handleClose} />
-            <main className="mx-auto flex min-h-[calc(100vh-105px)] w-full max-w-2xl flex-col justify-center px-6 py-12">
-              <motion.div
-                key={question.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <AuditQuestion
-                  question={question}
-                  dict={dict}
-                  value={answers[question.id]}
-                  onChange={handleChange}
-                  onEnter={() => goNext(answers)}
-                  error={errorKey ? t(`audit.ui.${errorKey}`) : null}
+        {stage === "checklist" && (
+          <main className="mx-auto w-full max-w-2xl px-6 py-12">
+            <h2 className="mb-6 text-center text-xl font-bold leading-snug sm:text-2xl">{t("audit.checklist.heading")}</h2>
+            <div className="flex flex-col gap-3">
+              {DIAGNOSTIC_QUESTIONS.map((q) => (
+                <ChecklistItem
+                  key={q.id}
+                  label={t(`audit.questions.${q.id}`)}
+                  checked={Boolean(answers[q.id])}
+                  onToggle={() => toggleAnswer(q.id)}
                 />
-              </motion.div>
-
-              {submitErrorKey && (
-                <p className="mt-6 rounded-xl border border-[#ff8080]/30 bg-[#ff8080]/10 p-4 text-sm text-[#ff8080]">
-                  {t(`audit.ui.${submitErrorKey}`)}
-                </p>
-              )}
-
-              <div className="mt-10 flex items-center justify-between gap-4">
-                <button
-                  type="button"
-                  onClick={goBack}
-                  disabled={safeIndex === 0 || stage === "submitting"}
-                  className="rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-white/70 transition hover:border-white/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-0"
-                >
-                  {t("audit.ui.back")}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => goNext(answers)}
-                  disabled={stage === "submitting"}
-                  className="inline-flex items-center gap-2 rounded-full bg-[var(--yellow)] px-7 py-3 text-sm font-bold text-neutral-950 transition hover:bg-white disabled:opacity-60"
-                >
-                  {stage === "submitting"
-                    ? t("audit.ui.submitting")
-                    : safeIndex === total - 1
-                      ? t("audit.ui.submit")
-                      : t("audit.ui.next")}
-                  {stage !== "submitting" && <NextIcon size={16} />}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={startOver}
-                className="mx-auto mt-8 block text-xs font-semibold text-white/30 underline-offset-4 transition hover:text-white/60 hover:underline"
-              >
-                {t("audit.ui.startOver")}
-              </button>
-            </main>
-          </>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setStage("results")}
+              className="mx-auto mt-8 flex items-center gap-2 rounded-full bg-[var(--yellow)] px-8 py-4 text-sm font-bold text-neutral-950 transition hover:bg-white"
+            >
+              {t("audit.checklist.seeResults")}
+            </button>
+          </main>
         )}
 
-        {stage === "success" && (
-          <>
-            <ModalHeader showProgress={false} onClose={handleClose} />
-            <main className="mx-auto flex min-h-[calc(100vh-73px)] w-full max-w-xl flex-col justify-center px-6 py-16 text-center">
-              <h1 className="mb-6 text-[clamp(1.8rem,4vw,2.6rem)] font-extrabold leading-[1.15] tracking-[-0.02em]">
-                {t("audit.success.title")}
-              </h1>
-              <div className="mb-8 flex flex-col gap-4 text-start text-base leading-7 text-white/70">
-                {t("audit.success.paragraphs").map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-              <p className="mb-10 font-bold text-white">
-                {t("audit.success.signoff")}
-                <br />
-                <span className="text-sm font-semibold uppercase tracking-[0.2em] text-white/40">{t("audit.success.brand")}</span>
-              </p>
+        {stage === "results" && (
+          <main className="mx-auto w-full max-w-2xl px-6 py-12">
+            <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.28em] text-[var(--blue)]">
+              {t("audit.results.scoreLabel")}
+            </p>
+            <h1 className="mb-3 text-center text-[clamp(1.6rem,4vw,2.4rem)] font-extrabold leading-[1.15] tracking-[-0.02em]">
+              {bandCopy.title}
+            </h1>
+            <p className="mb-10 text-center text-base leading-7 text-white/65">{bandCopy.body}</p>
 
-              {whatsapp && (
-                <div>
-                  <p className="mb-4 text-sm text-white/50">{t("audit.success.ctaLead")}</p>
-                  <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <a
-                      href="https://calendly.com/chassis-lb/chassis-discovery-call"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full rounded-full bg-[var(--yellow)] px-7 py-3.5 text-sm font-bold text-neutral-950 transition hover:bg-white sm:w-auto"
-                    >
-                      {t("audit.ui.bookCallButton")}
-                    </a>
-                    <a
-                      href={whatsapp.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-white/50 sm:w-auto"
-                    >
-                      <MessageCircle size={16} />
-                      {t("audit.ui.whatsappButton")}
-                    </a>
-                  </div>
-                  <p className="mt-3 text-xs text-white/35">{t("audit.ui.whatsappNote")}</p>
+            <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+              <h3 className="mb-5 text-sm font-bold uppercase tracking-[0.15em] text-white/40">
+                {t("audit.results.categoryHeading")}
+              </h3>
+              <div className="flex flex-col gap-5">
+                <CategoryBar name={categories.foundation} gaps={breakdown.gaps.foundation} total={breakdown.totals.foundation} />
+                <CategoryBar name={categories.operations} gaps={breakdown.gaps.operations} total={breakdown.totals.operations} />
+                <CategoryBar name={categories.systems} gaps={breakdown.gaps.systems} total={breakdown.totals.systems} />
+                <CategoryBar name={categories.execution} gaps={breakdown.gaps.execution} total={breakdown.totals.execution} />
+              </div>
+            </div>
+
+            <div className="mb-10 rounded-2xl border border-[var(--blue)]/30 bg-[var(--blue)]/[0.06] p-6 sm:p-8">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[var(--blue)]">
+                {t("audit.results.recommendationLabel")}
+              </p>
+              <h3 className="mb-3 text-xl font-bold leading-snug">{recommendationCopy.title}</h3>
+              <p className="text-sm leading-6 text-white/70">{recommendationCopy.body}</p>
+            </div>
+
+            <p className="mb-4 text-center text-sm text-white/50">{t("audit.results.ctaLead")}</p>
+            <div className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <a
+                href="https://calendly.com/chassis-lb/chassis-discovery-call"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full rounded-full bg-[var(--yellow)] px-7 py-3.5 text-center text-sm font-bold text-neutral-950 transition hover:bg-white sm:w-auto"
+              >
+                {t("audit.ui.bookCallButton")}
+              </a>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-white/50 sm:w-auto"
+              >
+                <MessageCircle size={16} />
+                {t("audit.ui.whatsappButton")}
+              </a>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+              <h3 className="mb-1 text-base font-bold">{t("audit.ui.contactHeading")}</h3>
+              <p className="mb-5 text-sm leading-6 text-white/55">{t("audit.ui.contactLead")}</p>
+
+              {sendState === "sent" ? (
+                <p className="text-sm font-semibold text-white">{t("audit.ui.resultsSent")}</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <input
+                    type="text"
+                    value={contact.name}
+                    onChange={(e) => setContact((c) => ({ ...c, name: e.target.value }))}
+                    placeholder={t("audit.ui.namePlaceholder")}
+                    className="w-full rounded-xl border border-white/15 bg-white/[0.02] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[var(--blue)] focus:outline-none"
+                  />
+                  <input
+                    type="email"
+                    value={contact.email}
+                    onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
+                    placeholder={t("audit.ui.emailPlaceholder")}
+                    className="w-full rounded-xl border border-white/15 bg-white/[0.02] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[var(--blue)] focus:outline-none"
+                  />
+                  <input
+                    type="tel"
+                    value={contact.phone}
+                    onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value }))}
+                    placeholder={t("audit.ui.phonePlaceholder")}
+                    className="w-full rounded-xl border border-white/15 bg-white/[0.02] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[var(--blue)] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={contact.businessName}
+                    onChange={(e) => setContact((c) => ({ ...c, businessName: e.target.value }))}
+                    placeholder={t("audit.ui.businessPlaceholder")}
+                    className="w-full rounded-xl border border-white/15 bg-white/[0.02] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[var(--blue)] focus:outline-none"
+                  />
+
+                  {contactErrorKey && <p className="text-sm text-[#ff8080]">{t(`audit.ui.${contactErrorKey}`)}</p>}
+                  {sendState === "error" && <p className="text-sm text-[#ff8080]">{t("audit.ui.submitError")}</p>}
+
+                  <button
+                    type="button"
+                    onClick={sendResults}
+                    disabled={sendState === "sending"}
+                    className="mt-1 rounded-full bg-white px-6 py-3 text-sm font-bold text-neutral-950 transition hover:bg-white/85 disabled:opacity-60"
+                  >
+                    {sendState === "sending" ? t("audit.ui.submitting") : t("audit.ui.sendResults")}
+                  </button>
                 </div>
               )}
-            </main>
-          </>
+            </div>
+
+            <button
+              type="button"
+              onClick={startOver}
+              className="mx-auto mt-8 block text-xs font-semibold text-white/30 underline-offset-4 transition hover:text-white/60 hover:underline"
+            >
+              {t("audit.ui.startOver")}
+            </button>
+          </main>
         )}
       </motion.div>
     </div>,

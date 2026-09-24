@@ -1,5 +1,16 @@
 const SITE = "https://www.chassislb.com";
 
+// Physically based in Lebanon; service area now also covers the GCC.
+const AREA_SERVED = [
+  { "@type": "Country", name: "Lebanon" },
+  { "@type": "Country", name: "United Arab Emirates" },
+  { "@type": "Country", name: "Saudi Arabia" },
+  { "@type": "Country", name: "Qatar" },
+  { "@type": "Country", name: "Kuwait" },
+  { "@type": "Country", name: "Bahrain" },
+  { "@type": "Country", name: "Oman" },
+];
+
 export function organizationSchema(lang) {
   return {
     "@context": "https://schema.org",
@@ -10,7 +21,7 @@ export function organizationSchema(lang) {
     logo: `${SITE}/images/chassis-logo-white.png`,
     image: `${SITE}/og-image.jpg`,
     email: "chassis.lb@gmail.com",
-    areaServed: { "@type": "Country", name: "Lebanon" },
+    areaServed: AREA_SERVED,
     address: { "@type": "PostalAddress", addressCountry: "LB" },
     founder: {
       "@type": "Person",
@@ -33,7 +44,7 @@ export function serviceSchema(item, lang) {
     name: item.name,
     description: item.summary,
     provider: { "@id": `${SITE}/#organization` },
-    areaServed: { "@type": "Country", name: "Lebanon" },
+    areaServed: AREA_SERVED,
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",

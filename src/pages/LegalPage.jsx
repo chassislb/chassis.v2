@@ -13,7 +13,7 @@ export default function LegalPage({ contentKey, path }) {
     <>
       <SEO
         path={path}
-        title={`${content.heading} — Chassis`}
+        title={`Chassis: ${content.heading.replace(/\.$/, "")}`}
         description={content.intro}
         jsonLd={[organizationSchema(lang)]}
       />

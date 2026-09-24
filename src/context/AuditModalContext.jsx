@@ -6,7 +6,7 @@ const AuditModalContext = createContext(null);
 export function AuditModalProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Support direct links to /audit (and /ar/audit) — open the popup on top of whatever page loads.
+  // Support direct links to /audit (and /ar/audit): open the popup on top of whatever page loads.
   useEffect(() => {
     const { path } = parseLangPath(window.location.pathname);
     if (path.replace(/\/$/, "") === "/audit") {

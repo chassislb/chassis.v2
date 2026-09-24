@@ -36,7 +36,7 @@ function ServiceBlock({ item, t }) {
       <p className="mb-2 max-w-3xl text-base leading-7 text-white/70">{item.lead}</p>
       <p className="mb-5 max-w-3xl text-base leading-7 text-white/60">{item.body}</p>
 
-      {/* 4. Outcome — flowing sentence, not a boxed callout */}
+      {/* 4. Outcome: flowing sentence, not a boxed callout */}
       <p className="mb-8 max-w-3xl text-base leading-7 text-white/75">
         <span className="font-bold text-white">{t("services.outcomeLabel")} </span>
         {item.outcome}
@@ -67,13 +67,25 @@ function ServiceBlock({ item, t }) {
         </ul>
       </div>
 
-      {/* 8. Investment — stated flat, inline */}
+      {/* 8. Investment: stated flat, inline */}
       <div>
         <h4 className="mb-1 text-sm font-bold uppercase tracking-[0.15em] text-white/40">{t("services.investmentLabel")}</h4>
         <p className="mb-1 text-2xl font-bold text-[var(--yellow)]">{item.price}</p>
-        <p className="max-w-2xl text-sm leading-6 text-white/60">{item.priceNote}</p>
+        <p className="max-w-2xl text-sm leading-6 text-white/60">{t("services.priceNoteDefault")}</p>
       </div>
     </article>
+  );
+}
+
+function OngoingPartner({ t }) {
+  const partner = t("services.ongoingPartner");
+  return (
+    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[var(--blue)]">{partner.eyebrow}</p>
+      <h3 className="mb-3 text-xl font-bold leading-snug">{partner.name}</h3>
+      <p className="mb-4 text-sm leading-6 text-white/60">{partner.body}</p>
+      <p className="text-sm font-bold text-white">{partner.price}</p>
+    </div>
   );
 }
 
@@ -92,6 +104,8 @@ function Services() {
             <ServiceBlock key={item.id} item={item} t={t} />
           ))}
         </div>
+
+        <OngoingPartner t={t} />
 
         <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[var(--blue)]">

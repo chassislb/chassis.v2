@@ -47,7 +47,7 @@ function HomePage() {
 }
 
 function App() {
-  // "/audit" has no dedicated page anymore — it's a popup available from any
+  // "/audit" has no dedicated page anymore. It's a popup available from any
   // page. Visiting the URL directly still lands you on a real page (the
   // homepage) and AuditModalProvider opens the popup on top of it.
   // Language lives as a "/ar" URL prefix, so strip it before matching pages.
