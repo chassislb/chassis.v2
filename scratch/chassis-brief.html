@@ -1,0 +1,439 @@
+<title>Chassis Brief</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: rgba(255,255,255,0.1);
+    --border-strong: rgba(255,255,255,0.18);
+    --text: #ffffff;
+    --text-dim: #b4b4b5;
+    --text-faint: rgba(255,255,255,0.4);
+    --yellow: #f3cc31;
+    --blue: #36c6f4;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    padding-inline: 20px;
+    padding-block: 48px 96px;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 56ch;
+    margin: 0 0 40px;
+  }
+
+  section { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+  section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  h2 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 18px;
+  }
+
+  h3 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+
+  p { margin: 0 0 12px; color: var(--text-dim); font-size: 15px; }
+  p:last-child { margin-bottom: 0; }
+  p.tight { color: var(--text); }
+
+  strong { color: var(--text); font-weight: 600; }
+
+  .model-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 620px) { .model-row { grid-template-columns: 1fr; } }
+
+  .model-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .model-card .num {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+  .model-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--yellow);
+  }
+  .model-card p { font-size: 13.5px; margin: 0; }
+
+  .service {
+    display: flex;
+    gap: 16px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+  }
+  .service:first-child { border-top: none; padding-top: 0; }
+  .service .idx {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    padding-top: 2px;
+    width: 22px;
+  }
+  .service-body { flex: 1; min-width: 0; }
+  .service-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .service-head h3 { margin: 0; }
+  .price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+  .service p { font-size: 14px; margin: 0; }
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    border: 1px solid rgba(54,198,244,0.35);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 8px;
+  }
+
+  .proof-grid { display: flex; flex-direction: column; gap: 14px; }
+  .proof {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .proof .name { font-weight: 700; font-size: 14.5px; margin-bottom: 4px; }
+  .proof .result { font-size: 13.5px; color: var(--text-dim); }
+
+  ul.plain { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  ul.plain li {
+    font-size: 14.5px;
+    color: var(--text-dim);
+    padding-left: 18px;
+    position: relative;
+  }
+  ul.plain li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--yellow);
+  }
+
+  .channels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  @media (max-width: 480px) { .channels { grid-template-columns: 1fr; } }
+  .channel { font-size: 14px; padding: 10px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; }
+  .channel .k { color: var(--text-faint); }
+  .channel .v { color: var(--text); text-align: right; }
+
+  .rule-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+  }
+  .rule-box p { margin: 0 0 8px; }
+  .rule-box p:last-child { margin: 0; }
+
+  .copybar {
+    position: sticky;
+    top: 16px;
+    z-index: 5;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+  .copybtn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0a0a0a;
+    background: var(--yellow);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  .copybtn:hover { opacity: 0.88; }
+  .copybtn.done { background: var(--text); }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+</style>
+
+<div class="wrap">
+  <div class="copybar">
+    <button class="copybtn" id="copyBtn" type="button">Copy full brief</button>
+  </div>
+
+  <p class="eyebrow">Company Brief · For Marketing Planning</p>
+  <h1>Chassis structures businesses and builds the systems behind them.</h1>
+  <p class="lede">Founder-led operational practice based in Lebanon, serving Lebanon and the GCC. Use this as the complete, current reference for anything you write about Chassis. Don't invent facts beyond it, ask if something's missing.</p>
+
+  <section>
+    <h2>The Model</h2>
+    <div class="model-row">
+      <div class="model-card">
+        <div class="num">01</div>
+        <h4>Diagnose</h4>
+        <p>Identify what's actually creating friction, not what looks broken on the surface.</p>
+      </div>
+      <div class="model-card">
+        <div class="num">02</div>
+        <h4>Structure</h4>
+        <p>Clarify the offer, pricing, workflows, roles, and direction.</p>
+      </div>
+      <div class="model-card">
+        <div class="num">03</div>
+        <h4>Build</h4>
+        <p>Build what's needed to make it real: websites, CRM, automation, internal tools, SOPs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Founder &amp; Market</h2>
+    <p class="tight"><strong>Sophia Ayoubi</strong>, founder. 8+ years restructuring hospitality venues, launching startups, and building execution systems. Operational background at Emirates Airlines before this work. Based in Batroun, Lebanon.</p>
+    <p><strong>Market:</strong> Lebanon and the GCC (UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman). Work is delivered remotely.</p>
+    <p><strong>Audience:</strong> founders and operators running active but unstructured businesses, mainly hospitality, startups, and consulting practices, but not limited to them.</p>
+    <p><strong>Good fit:</strong> real activity with no clear offer, or a business running on friction and inconsistency. <strong>Not a fit:</strong> surface-level fixes, content or ads without structural work, or an idea with no discipline to follow a system.</p>
+  </section>
+
+  <section>
+    <h2>Services</h2>
+
+    <div class="service">
+      <div class="idx">00</div>
+      <div class="service-body">
+        <span class="tag">Entry Point</span>
+        <div class="service-head"><h3>Free Business Diagnostic</h3><span class="price">Free</span></div>
+        <p>10-question, self-scored checklist across four areas (Foundation, Operations, Systems, Execution). Instant results plus a recommended starting service. The acquisition engine, the only free offering.</p>
+      </div>
+    </div>
+
+    <div class="service">
+      <div class="idx">01</div>
+      <div class="service-body">
+        <div class="service-head"><h3>Business Foundation</h3><span class="price">From $600</span></div>
+        <p>For businesses that need the offer, pricing, and direction figured out before anything else gets built.</p>
+      </div>
+    </div>
+
+    <div class="service">
+      <div class="idx">02</div>
+      <div class="service-body">
+        <div class="service-head"><h3>Operations &amp; Systems</h3><span class="price">From $900</span></div>
+        <p>For businesses that already work but where the work itself is messy or too dependent on one person. Workflow redesign and the systems that run it, CRM, dashboards, automation, website, SOPs, built in the same engagement.</p>
+      </div>
+    </div>
+
+    <div class="service">
+      <div class="idx">03</div>
+      <div class="service-body">
+        <span class="tag">Flagship</span>
+        <div class="service-head"><h3>Business Build</h3><span class="price">From $2,500</span></div>
+        <p>End to end: positioning, offer, pricing, workflows, website, CRM, automation, SOPs, launch. For founders starting from an idea, or businesses that need a full rebuild.</p>
+      </div>
+    </div>
+
+    <div class="service">
+      <div class="idx">04</div>
+      <div class="service-body">
+        <span class="tag">Secondary</span>
+        <div class="service-head"><h3>Ongoing Operational Partner</h3><span class="price">Custom, retainer</span></div>
+        <p>Available only after a client completes one of the above. Continued operational review and correction.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:18px; font-size:13px;">Published prices are "from" figures only. Final scope and price are confirmed after understanding the work. Never state a fixed total.</p>
+  </section>
+
+  <section>
+    <h2>Proof (verified, nothing invented)</h2>
+    <div class="proof-grid">
+      <div class="proof"><div class="name">Chef Michel Karam</div><div class="result">No defined consulting offer to a structured culinary consulting practice with full digital presence. Two paying clients and a third lead within three months, including work in Egypt.</div></div>
+      <div class="proof"><div class="name">Le Pavé Bar</div><div class="result">Outstanding debt cleared in 30 days. Daily revenue moved from under $100 to $200+ through structural correction alone.</div></div>
+      <div class="proof"><div class="name">La Gare</div><div class="result">Weekday revenue moved from $20 to $300+ by fixing operations, not by adding marketing.</div></div>
+      <div class="proof"><div class="name">The Ark Networks</div><div class="result">Full operational structure built for a coworking space, from pre-launch to stabilization.</div></div>
+      <div class="proof"><div class="name">Aline Kamakian / FIG Holding</div><div class="result">Award research and opportunity mapping for hospitality recognition.</div></div>
+      <div class="proof"><div class="name">Smart Vision</div><div class="result">Digital infrastructure for a professional business presence.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chef Intel <span style="color:var(--text-faint); font-weight:500; text-transform:none; letter-spacing:0;">— secondary product</span></h2>
+    <p class="tight">An operating system for chefs, culinary consultants, and restaurant operators: menu engineering, recipe costing, restaurant assessments, staffing, HACCP compliance, SOPs, and operational reporting in one system. Built in 17 languages.</p>
+    <p>Currently in Google Play testing, not publicly launched, do not say it's available for download. Proof that Chassis builds, not just advises. Instagram: @chef.intel.app</p>
+  </section>
+
+  <section>
+    <h2>Channels Already Live</h2>
+    <div class="channels">
+      <div class="channel"><span class="k">Website</span><span class="v">chassislb.com (EN/AR)</span></div>
+      <div class="channel"><span class="k">Instagram</span><span class="v">@chassis.lb</span></div>
+      <div class="channel"><span class="k">Facebook</span><span class="v">facebook.com/chassis.lb</span></div>
+      <div class="channel"><span class="k">LinkedIn</span><span class="v">Sophia Ayoubi + Chassis page</span></div>
+      <div class="channel"><span class="k">WhatsApp</span><span class="v">+961 71 085 824</span></div>
+      <div class="channel"><span class="k">Google Business</span><span class="v">Business management consultant, 5.0★</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Voice Rules</h2>
+    <div class="rule-box">
+      <p>No generic agency language: no "unlock your potential," "tailored solutions," "seamless," "take your business to the next level."</p>
+      <p>No em dashes, anywhere. Use periods, commas, or restructure the sentence.</p>
+      <p>Short, confident, specific sentences.</p>
+      <p>Never invent client names, statistics, testimonials, or results not listed here.</p>
+    </div>
+  </section>
+
+  <footer>Chassis · Brief compiled from chassislb.com, current as of the live site.</footer>
+</div>
+
+<script>
+  var briefText = [
+    "CHASSIS — COMPANY BRIEF",
+    "Chassis structures businesses and builds the systems behind them.",
+    "",
+    "THE MODEL: Diagnose -> Structure -> Build",
+    "Diagnose: identify what's actually creating friction, not what looks broken on the surface.",
+    "Structure: clarify the offer, pricing, workflows, roles, and direction.",
+    "Build: build what's needed to make it real (websites, CRM, automation, internal tools, SOPs).",
+    "",
+    "FOUNDER & MARKET",
+    "Sophia Ayoubi, founder. 8+ years restructuring hospitality venues, launching startups, and building execution systems. Operational background at Emirates Airlines before this work. Based in Batroun, Lebanon.",
+    "Market: Lebanon and the GCC (UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman). Work is delivered remotely.",
+    "Audience: founders and operators running active but unstructured businesses, mainly hospitality, startups, and consulting practices, but not limited to them.",
+    "Good fit: real activity with no clear offer, or a business running on friction and inconsistency. Not a fit: surface-level fixes, content or ads without structural work, or an idea with no discipline to follow a system.",
+    "",
+    "SERVICES",
+    "0. Free Business Diagnostic - Free. 10-question self-scored checklist across four areas (Foundation, Operations, Systems, Execution). Instant results plus a recommended starting service. The acquisition engine, the only free offering.",
+    "1. Business Foundation - From $600. For businesses that need the offer, pricing, and direction figured out before anything else gets built.",
+    "2. Operations & Systems - From $900. For businesses that already work but where the work itself is messy or too dependent on one person. Workflow redesign and the systems that run it (CRM, dashboards, automation, website, SOPs) built in the same engagement.",
+    "3. Business Build (flagship) - From $2,500. End to end: positioning, offer, pricing, workflows, website, CRM, automation, SOPs, launch. For founders starting from an idea, or businesses that need a full rebuild.",
+    "4. Ongoing Operational Partner (secondary) - Custom, retainer. Available only after a client completes one of the above. Continued operational review and correction.",
+    "Published prices are \"from\" figures only. Final scope and price are confirmed after understanding the work. Never state a fixed total.",
+    "",
+    "PROOF (verified, nothing invented)",
+    "Chef Michel Karam: no defined consulting offer to a structured culinary consulting practice with full digital presence. Two paying clients and a third lead within three months, including work in Egypt.",
+    "Le Pave Bar: outstanding debt cleared in 30 days. Daily revenue moved from under $100 to $200+ through structural correction alone.",
+    "La Gare: weekday revenue moved from $20 to $300+ by fixing operations, not by adding marketing.",
+    "The Ark Networks: full operational structure built for a coworking space, from pre-launch to stabilization.",
+    "Aline Kamakian / FIG Holding: award research and opportunity mapping for hospitality recognition.",
+    "Smart Vision: digital infrastructure for a professional business presence.",
+    "",
+    "CHEF INTEL (secondary product)",
+    "An operating system for chefs, culinary consultants, and restaurant operators: menu engineering, recipe costing, restaurant assessments, staffing, HACCP compliance, SOPs, and operational reporting in one system. Built in 17 languages.",
+    "Currently in Google Play testing, not publicly launched, do not say it's available for download. Proof that Chassis builds, not just advises. Instagram: @chef.intel.app",
+    "",
+    "CHANNELS ALREADY LIVE",
+    "Website: chassislb.com (EN/AR)",
+    "Instagram: @chassis.lb",
+    "Facebook: facebook.com/chassis.lb",
+    "LinkedIn: Sophia Ayoubi + Chassis company page",
+    "WhatsApp: +961 71 085 824",
+    "Google Business Profile: Business management consultant, 5.0 star rating",
+    "",
+    "VOICE RULES",
+    "No generic agency language: no \"unlock your potential,\" \"tailored solutions,\" \"seamless,\" \"take your business to the next level.\"",
+    "No em dashes, anywhere. Use periods, commas, or restructure the sentence.",
+    "Short, confident, specific sentences.",
+    "Never invent client names, statistics, testimonials, or results not listed here."
+  ].join("\n");
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var btn = this;
+    function done() {
+      btn.textContent = 'Copied';
+      btn.classList.add('done');
+      setTimeout(function () {
+        btn.textContent = 'Copy full brief';
+        btn.classList.remove('done');
+      }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(briefText).then(done).catch(function () {
+        btn.textContent = 'Select text below to copy';
+      });
+    } else {
+      btn.textContent = 'Select text below to copy';
+    }
+  });
+</script>

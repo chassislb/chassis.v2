@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./components/Navbar/Navbar";
 import Hero from "./components/Hero/Hero";
 import Problem from "./components/Problem/Problem";
@@ -62,6 +63,7 @@ function App() {
         {page}
         <AuditModal />
       </AuditModalProvider>
+      <Analytics />
     </LanguageProvider>
   );
 }
