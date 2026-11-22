@@ -9,6 +9,7 @@ export default {
     links: [
       { label: "Services", href: "#services" },
       { label: "Work", href: "#work" },
+      { label: "Built From Lebanon", href: "/built-from-lebanon" },
       { label: "About", href: "#about" },
       { label: "Free Diagnostic", href: "/audit" },
       { label: "Contact", href: "#contact" },

@@ -12,6 +12,7 @@ import Contact from "./components/Contact/Contact";
 import Footer from "./components/Footer/Footer";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import BuiltFromLebanon from "./pages/BuiltFromLebanon";
 import AuditModal from "./components/Audit/AuditModal";
 import SEO from "./components/common/SEO";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
@@ -56,6 +57,7 @@ function App() {
   let page = <HomePage />;
   if (path === "/terms" || path === "/terms/") page = <Terms />;
   else if (path === "/privacy" || path === "/privacy/") page = <Privacy />;
+  else if (path === "/built-from-lebanon" || path === "/built-from-lebanon/") page = <BuiltFromLebanon />;
 
   return (
     <LanguageProvider>

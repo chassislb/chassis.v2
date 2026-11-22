@@ -61,4 +61,23 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.chassislb.com/privacy" />
   </url>
 
+  <url>
+    <loc>https://www.chassislb.com/built-from-lebanon</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.chassislb.com/built-from-lebanon" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.chassislb.com/ar/built-from-lebanon" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.chassislb.com/built-from-lebanon" />
+  </url>
+  <url>
+    <loc>https://www.chassislb.com/ar/built-from-lebanon</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.chassislb.com/built-from-lebanon" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://www.chassislb.com/ar/built-from-lebanon" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.chassislb.com/built-from-lebanon" />
+  </url>
+
 </urlset>

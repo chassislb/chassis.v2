@@ -9,6 +9,7 @@ export default {
     links: [
       { label: "الخدمات", href: "#services" },
       { label: "الأعمال", href: "#work" },
+      { label: "Built From Lebanon", href: "/built-from-lebanon" },
       { label: "عن Chassis", href: "#about" },
       { label: "تقييم مجاني", href: "/audit" },
       { label: "تواصل", href: "#contact" },

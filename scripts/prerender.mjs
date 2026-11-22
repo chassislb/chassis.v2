@@ -42,9 +42,11 @@ const ROUTES = [
   "/",
   "/terms",
   "/privacy",
+  "/built-from-lebanon",
   "/ar",
   "/ar/terms",
   "/ar/privacy",
+  "/ar/built-from-lebanon",
 ];
 
 const MIME = {

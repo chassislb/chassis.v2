@@ -1,0 +1,41 @@
+BUILT FROM LEBANON — WEBSITE UPDATE
+=================================
+
+New page after deployment:
+https://chassislb.com/built-from-lebanon
+Arabic version: https://chassislb.com/ar/built-from-lebanon
+
+WHAT WAS ADDED
+- Responsive, bilingual (English / Lebanese Arabic) sales page
+- Links to product from existing Chassis navigation
+- Product information, seven-stage method, FAQ, $150 launch price
+- Ordering by email (mailto:chassis.lb@gmail.com), not an automated checkout
+- Free, printable 2-page worksheet at /downloads/built-from-lebanon-7-decisions.pdf
+- Sitemap entry and prerender routes for search engines
+
+DEPLOY USING GITHUB DESKTOP (RECOMMENDED)
+1. On Windows install/open GitHub Desktop and sign in to your GitHub account.
+2. File > Clone repository > select chassislb/chassis.v2 > Clone.
+3. Make a backup copy of the clone folder first if you want an undo option.
+4. Extract the UPDATED-WEBSITE ZIP. Open chassis.v2-main inside that ZIP.
+5. Copy the contents (src, public, scripts, etc.) into the repository folder GitHub Desktop cloned. Choose 'Replace' when asked for existing files. Do not delete the repository's hidden .git folder. Do not upload the ZIP as a single file to the repository.
+6. In GitHub Desktop, review changed files, enter commit message 'Add Built From Lebanon sales page', click Commit to main, and click Push origin.
+7. Vercel is connected to this repository and should deploy the new commit. Review the Vercel deployment status and test the new page on mobile and desktop.
+
+ALTERNATIVE: APPLY ONLY THE CHANGED-FILES ZIP
+The separate changes ZIP contains exactly the added/edited files, with their paths preserved. Copy these into your cloned repository and follow steps 6–7.
+
+PLEASE REVIEW BEFORE PUBLISHING
+- Price: $150 launch / $200 regular
+- Order inbox: chassis.lb@gmail.com
+- Original manual preview URL
+- Content language: manual is English (landing page available in Arabic)
+- Delivery/payment terms: handled manually by email
+
+QUALITY STATUS
+TypeScript JSX syntax diagnostics: passed.
+Sitemap XML parse: passed.
+Free worksheet PDF presence and visual inspection: passed.
+FULL npm build was NOT confirmed in this environment because dependency installation timed out. Vercel will run the real production build on push. If Vercel fails, copy its error log into ChatGPT and we can fix it.
+
+No payment gateway, lead capture backend, or automatic ebook delivery is implemented. The free PDF intentionally downloads without collecting emails; this avoids a broken signup flow until we choose and configure a consent-based signup provider.
